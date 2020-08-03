@@ -1,3 +1,9 @@
+python3-application (3.0.0) unstable; urgency=medium
+
+  * Migrate to python3
+
+ -- Adrian Georgescu <ag@ag-projects.com>  Mon, 08 Jun 2020 20:36:28 +0200
+
 python-application (2.8.0) unstable; urgency=medium
 
   * Fixed issue with the syslog handler and null bytes in messages

@@ -1,7 +1,7 @@
 
 """Python language extensions"""
 
-from __builtin__ import min as minimum, max as maximum
+from builtins import min as minimum, max as maximum
 from application.python.types import NullType
 
 

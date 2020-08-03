@@ -1,19 +1,20 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 """Example of using the debug facilities of python-application"""
 
 # Timing code execution
 
 from application.debug.timing import timer
+from application.debug.memory import *
 
 s1 = 'abcdef'
 s2 = 'ghijkl'
 s3 = 'mnopqr'
 
-print ""
-print "Timing different methods of adding strings"
-print "------------------------------------------"
-print ""
+print("")
+print("Timing different methods of adding strings")
+print("------------------------------------------")
+print("")
 
 # the loop count can be explicitly specified, but it's easier to let the
 # timer automatically detect the loop count that will keep the total runtime
@@ -42,17 +43,16 @@ class C2(object):
     def __del__(self):
         pass
 
-from application.debug.memory import *
 
-print ""
-print "Debugging memory leaks"
-print "----------------------"
-print ""
+print("")
+print("Debugging memory leaks")
+print("----------------------")
+print("")
 
 a = C1()
 del a
 
-print "This will reveal no memory references"
+print("This will reveal no memory references")
 memory_dump()
 
 a = C1()
@@ -61,7 +61,7 @@ a.b = b
 b.a = a
 del a, b
 
-print "\n\nThis will reveal a collectable circular reference"
+print("\n\nThis will reveal a collectable circular reference")
 memory_dump()
 
 a = C2()
@@ -70,5 +70,5 @@ a.b = b
 b.a = a
 del a, b
 
-print "\n\nThis will reveal an uncollectable circular reference (mem leak)"
+print("\n\nThis will reveal an uncollectable circular reference (mem leak)")
 memory_dump()

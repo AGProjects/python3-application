@@ -13,10 +13,8 @@ __all__ = 'host', 'makedirs', 'openfile', 'unlink', 'FileExistsError'
 
 # System properties and attributes
 
-class HostProperties(object):
+class HostProperties(object, metaclass=Singleton):
     """Host specific properties"""
-
-    __metaclass__ = Singleton
 
     @staticmethod
     def outgoing_ip_for(destination):
@@ -47,7 +45,7 @@ class HostProperties(object):
 
     @property
     def domain(self):
-        return socket.getfqdn()[len(socket.gethostname())+1:] or None
+        return socket.getfqdn()[len(socket.gethostname()) + 1:] or None
 
     @property
     def aliases(self):
@@ -67,7 +65,7 @@ def makedirs(path, mode=0o777):
     """Create a directory recursively and ignore error if it already exists"""
     try:
         os.makedirs(path, mode)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST and os.path.isdir(path) and os.access(path, os.R_OK | os.W_OK | os.X_OK):
             return
         raise

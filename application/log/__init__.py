@@ -8,7 +8,6 @@ import logging
 import warnings
 import __main__
 
-from application.log.extensions import twisted
 from application.python import Null
 
 try:
@@ -36,7 +35,7 @@ class Formatter(logging.Formatter):
             message = record.message
         if self.prefix_format:
             prefix = self.prefix_format.format(record=record).ljust(self.prefix_length)
-            message = '\n'.join(prefix+line for line in message.split('\n'))
+            message = '\n'.join(prefix + l for l in message.split('\n'))
         return message
 
     def formatException(self, exc_info):
@@ -141,13 +140,11 @@ class Logger(logging.Logger):
 
 
 # logging.setLoggerClass(Logger)
-logging.Logger.exception = Logger.exception.__func__
+logging.Logger.exception = Logger.exception  # .__func__()
 logging.exception = exception
 
 
-class ContextualLogger(object):
-    __metaclass__ = abc.ABCMeta
-
+class ContextualLogger(object, metaclass=abc.ABCMeta):
     def __init__(self, logger, **context):
         self.logger = logger
         self.__dict__.update(context)
@@ -239,7 +236,7 @@ class LevelHandler(object):
 
     @property
     def named_levels(self):
-        return {self.NOTSET, self.DEBUG, self.INFO, self.WARNING, self.ERROR, self.CRITICAL} | {item for item in self.__dict__.values() if isinstance(item, NamedLevel)}
+        return {self.NOTSET, self.DEBUG, self.INFO, self.WARNING, self.ERROR, self.CRITICAL} | {item for item in list(self.__dict__.values()) if isinstance(item, NamedLevel)}
 
     def __setattr__(self, name, value):
         if isinstance(value, NamedLevel) and value not in self.named_levels:
@@ -254,10 +251,10 @@ level = LevelHandler()
 #
 
 class SyslogHandler(logging.Handler):
-    priority_map = {logging.DEBUG:    syslog.LOG_DEBUG,
-                    logging.INFO:     syslog.LOG_INFO,
-                    logging.WARNING:  syslog.LOG_WARNING,
-                    logging.ERROR:    syslog.LOG_ERR,
+    priority_map = {logging.DEBUG: syslog.LOG_DEBUG,
+                    logging.INFO: syslog.LOG_INFO,
+                    logging.WARNING: syslog.LOG_WARNING,
+                    logging.ERROR: syslog.LOG_ERR,
                     logging.CRITICAL: syslog.LOG_CRIT}
 
     def __init__(self, name, facility=syslog.LOG_DAEMON):
@@ -273,7 +270,7 @@ class SyslogHandler(logging.Handler):
         try:
             priority = self.priority_map.get(record.levelno, syslog.LOG_INFO)
             message = self.format(record)
-            if isinstance(message, unicode):
+            if isinstance(message, str):
                 message = message.encode('UTF-8')
             for line in message.rstrip().replace('\0', '#000').split('\n'):  # syslog.syslog() raises TypeError if null bytes are present in the message
                 syslog.syslog(priority, line)
@@ -322,7 +319,7 @@ class StandardIOLogger(io.IOBase):
 
     def write(self, string):
         self._checkClosed()
-        if isinstance(string, unicode):
+        if isinstance(string, str):
             string = string.encode(self._encoding)
         lines = (self._buffer + string).split('\n')
         self._buffer = lines[-1]
@@ -332,7 +329,7 @@ class StandardIOLogger(io.IOBase):
     def writelines(self, lines):
         self._checkClosed()
         for line in lines:
-            if isinstance(line, unicode):
+            if isinstance(line, str):
                 line = line.encode(self._encoding)
             self._logger(line)
 
@@ -340,7 +337,7 @@ class StandardIOLogger(io.IOBase):
 class WhenNotInteractive(object):
     """True when running under a non-interactive interpreter and False otherwise"""
 
-    def __nonzero__(self):
+    def __bool__(self):
         return hasattr(__main__, '__file__') or getattr(sys, 'frozen', False)
 
     def __repr__(self):

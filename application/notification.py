@@ -6,7 +6,7 @@ from collections import deque
 from datetime import datetime
 from threading import Lock
 from time import time
-from zope.interface import Interface, implements
+from zope.interface import Interface, implementer
 
 from application import log
 from application.python.descriptor import ThreadLocal
@@ -17,14 +17,12 @@ from application.python.weakref import weakobjectmap
 __all__ = 'Any', 'UnknownSender', 'IObserver', 'NotificationData', 'Notification', 'NotificationCenter', 'ObserverWeakrefProxy'
 
 
-class Any(object):
+class Any(object, metaclass=MarkerType):
     """Any sender or notification name"""
-    __metaclass__ = MarkerType
 
 
-class UnknownSender(object):
+class UnknownSender(object, metaclass=MarkerType):
     """A special sender used for anonymous notifications"""
-    __metaclass__ = MarkerType
 
 
 class IObserver(Interface):
@@ -35,14 +33,13 @@ class IObserver(Interface):
         """Function used to handle a posted Notification"""
 
 
+@implementer(IObserver)
 class ObserverWeakrefProxy(object):
     """
     A proxy that allows an observer to be weakly referenced and automatically
     removes any remaining registrations that the observer didn't clean itself
     before its reference count dropped to zero.
     """
-
-    implements(IObserver)
 
     observer_map = weakobjectmap()
     lock = Lock()
@@ -61,7 +58,7 @@ class ObserverWeakrefProxy(object):
     # noinspection PyUnusedLocal
     def cleanup(self, ref):
         # remove all observer's remaining registrations (the ones that the observer didn't remove itself)
-        for notification_center in NotificationCenter.__instances__.itervalues():
+        for notification_center in NotificationCenter.__instances__.values():
             notification_center.purge_observer(self)
 
     def handle_notification(self, notification):
@@ -77,7 +74,7 @@ class NotificationData(object):
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join('%s=%r' % (name, value) for name, value in self.__dict__.iteritems()))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join('%s=%r' % (name, value) for name, value in self.__dict__.items()))
 
 
 class Notification(object):
@@ -103,14 +100,12 @@ class Notification(object):
         return '%s(%r, %r, %r)' % (self.__class__.__name__, self.name, self.sender, self.data)
 
 
-class NotificationCenter(object):
+class NotificationCenter(object, metaclass=Singleton):
     """
     A NotificationCenter allows observers to subscribe to receive notifications
     identified by name and sender and will distribute the posted notifications
     according to those subscriptions.
     """
-
-    __metaclass__ = Singleton
 
     queue = ThreadLocal(deque)
 
@@ -178,7 +173,7 @@ class NotificationCenter(object):
     def purge_observer(self, observer):
         """Remove all the observer's subscriptions."""
         with self.lock:
-            subscriptions = [(key, observer_set) for key, observer_set in self.observers.iteritems() if observer in observer_set]
+            subscriptions = [(key, observer_set) for key, observer_set in self.observers.items() if observer in observer_set]
             for key, observer_set in subscriptions:
                 observer_set.remove(observer)
                 if not observer_set:
@@ -202,10 +197,10 @@ class NotificationCenter(object):
 
         while queue:
             notification = queue[0]
-            observers = (self.observers.get((Any, Any), empty_set) |
-                         self.observers.get((Any, notification.sender), empty_set) |
-                         self.observers.get((notification.name, Any), empty_set) |
-                         self.observers.get((notification.name, notification.sender), empty_set))
+            observers = (self.observers.get((Any, Any), empty_set)
+                         | self.observers.get((Any, notification.sender), empty_set)
+                         | self.observers.get((notification.name, Any), empty_set)
+                         | self.observers.get((notification.name, notification.sender), empty_set))
             for observer in observers:
                 try:
                     observer.handle_notification(notification)

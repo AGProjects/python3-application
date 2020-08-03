@@ -6,7 +6,6 @@ from threading import RLock
 
 from application.python.weakref import weakobjectmap
 
-
 __all__ = 'decorator', 'preserve_signature', 'execute_once'
 
 
@@ -20,7 +19,7 @@ def preserve_signature(func):
     def fix_signature(wrapper):
         exec_scope = {}
         parameters = formatargspec(*getargspec(func), formatvalue=lambda value: '')
-        exec 'def {0}{1}: return wrapper{1}'.format(func.__name__, parameters) in {'wrapper': wrapper}, exec_scope  # can't use tuple form here (see https://bugs.python.org/issue21591)
+        exec('def {0}{1}: return wrapper{1}'.format(func.__name__, parameters), {'wrapper': wrapper}, exec_scope)  # can't use tuple form here (see https://bugs.python.org/issue21591)
         new_wrapper = exec_scope.pop(func.__name__)
         new_wrapper.__name__ = func.__name__
         new_wrapper.__doc__ = func.__doc__
@@ -50,12 +49,12 @@ def execute_once(func):
         def __call__(self, *args, **kw):
             with self.im_func_wrapper.lock:
                 method = self.__method__
-                check_arguments.__get__(method.im_self, method.im_class)(*args, **kw)
-                instance = method.im_self if method.im_self is not None else args[0]
+                check_arguments.__get__(method.__self__, method.__self__.__class__)(*args, **kw)
+                instance = method.__self__ if method.__self__ is not None else args[0]
                 if self.im_func_wrapper.__callmap__.get(instance, False):
                     return
                 self.im_func_wrapper.__callmap__[instance] = True
-                self.im_func_wrapper.__callmap__[method.im_class] = True
+                self.im_func_wrapper.__callmap__[method.__self__.__class__] = True
                 return method.__call__(*args, **kw)
 
         def __dir__(self):
@@ -85,7 +84,7 @@ def execute_once(func):
 
         @property
         def called(self):
-            return self.im_func_wrapper.__callmap__.get(self.__method__.im_self if self.__method__.im_self is not None else self.__method__.im_class, False)
+            return self.im_func_wrapper.__callmap__.get(self.__method__.__self__ if self.__method__.__self__ is not None else self.__method__.__self__.__class__, False)
 
         @property
         def lock(self):
@@ -149,7 +148,7 @@ from application.python.decorator import decorator, preserve_signature
 def print_args(func):
     @preserve_signature(func)
     def wrapper(*args, **kw):
-        print('arguments: args={}, kw={}'.format(args, kw))
+        print('arguments: args={}, kw={}'.format(args, kw)
         return func(*args, **kw)
     return wrapper
 

@@ -7,6 +7,10 @@ import re
 __all__ = 'Version',
 
 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
+
 class Version(str):
     """A major.minor.micro[extraversion] version string that is comparable"""
 
@@ -23,10 +27,10 @@ class Version(str):
         if extraversion is None:
             instance = str.__new__(cls, '%d.%d.%d' % (major, minor, micro))
             weight = 0
-        elif isinstance(extraversion, (int, long)):
+        elif isinstance(extraversion, int):
             instance = str.__new__(cls, '%d.%d.%d-%d' % (major, minor, micro, extraversion))
             weight = 0
-        elif isinstance(extraversion, basestring):
+        elif isinstance(extraversion, str):
             instance = str.__new__(cls, '%d.%d.%d%s' % (major, minor, micro, extraversion))
             match = re.match(r'^[-.]?(?P<name>(pre|rc|alpha|beta|))(?P<number>\d+)$', extraversion)
             if match:
@@ -48,7 +52,7 @@ class Version(str):
     def parse(cls, value):
         if isinstance(value, Version):
             return value
-        elif not isinstance(value, basestring):
+        elif not isinstance(value, str):
             raise TypeError('value should be a string')
         if value == 'undefined':
             return cls(None, None, None)
@@ -83,7 +87,7 @@ class Version(str):
     def __cmp__(self, other):
         if isinstance(other, Version):
             return cmp(self._version_info, other._version_info)
-        elif isinstance(other, basestring):
+        elif isinstance(other, str):
             return cmp(str(self), other)
         else:
             return NotImplemented
@@ -105,4 +109,3 @@ class Version(str):
 
     def __ne__(self, other):
         return self.__cmp__(other) != 0
-

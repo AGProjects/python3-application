@@ -1,6 +1,4 @@
 
-from __future__ import absolute_import
-
 import weakref
 
 from collections import MutableMapping, deque
@@ -19,9 +17,9 @@ class objectref(weakref.ref):
         self.id = id(object)
 
 
-class weakobjectid(long):
+class weakobjectid(int):
     def __new__(cls, object, discard_callback):
-        instance = long.__new__(cls, id(object))
+        instance = int.__new__(cls, id(object))
         instance.ref = objectref(object, discard_callback)
         return instance
 
@@ -72,7 +70,7 @@ class weakobjectmap(MutableMapping):
         return id(key) in self.__data__
 
     def __iter__(self):
-        return self.iterkeys()
+        return iter(self.keys())
 
     def __len__(self):
         return len(self.__data__)
@@ -84,14 +82,14 @@ class weakobjectmap(MutableMapping):
         return self.__class__(self)
 
     def __deepcopy__(self, memo):
-        return self.__class__((key, deepcopy(value, memo)) for key, value in self.iteritems())
+        return self.__class__((key, deepcopy(value, memo)) for key, value in self.items())
 
     def __repr__(self):
         with _ReprGuard(self) as guard:
             if guard.successive_run:
                 return '%s({...})' % self.__class__.__name__
             else:
-                return '%s({%s})' % (self.__class__.__name__, ', '.join(('%r: %r' % (key, value) for key, value in self.iteritems())))
+                return '%s({%s})' % (self.__class__.__name__, ', '.join(('%r: %r' % (key, value) for key, value in self.items())))
 
     @classmethod
     def fromkeys(cls, iterable, value=None):
@@ -107,22 +105,22 @@ class weakobjectmap(MutableMapping):
         return self.__class__(self)
 
     def iterkeys(self):
-        return (key for key in (key.ref() for key in self.__data__.keys()) if key is not None)
+        return (key for key in (key.ref() for key in list(self.__data__.keys())) if key is not None)
 
     def itervalues(self):
-        return (value for key, value in ((key.ref(), value) for key, value in self.__data__.items()) if key is not None)
+        return (value for key, value in ((key.ref(), value) for key, value in list(self.__data__.items())) if key is not None)
 
     def iteritems(self):
-        return ((key, value) for key, value in ((key.ref(), value) for key, value in self.__data__.items()) if key is not None)
+        return ((key, value) for key, value in ((key.ref(), value) for key, value in list(self.__data__.items())) if key is not None)
 
     def keys(self):
-        return [key for key in (key.ref() for key in self.__data__.keys()) if key is not None]
+        return [key for key in (key.ref() for key in list(self.__data__.keys())) if key is not None]
 
     def values(self):
-        return [value for key, value in ((key.ref(), value) for key, value in self.__data__.items()) if key is not None]
+        return [value for key, value in ((key.ref(), value) for key, value in list(self.__data__.items())) if key is not None]
 
     def items(self):
-        return [(key, value) for key, value in ((key.ref(), value) for key, value in self.__data__.items()) if key is not None]
+        return [(key, value) for key, value in ((key.ref(), value) for key, value in list(self.__data__.items())) if key is not None]
 
     def has_key(self, key):
         return key in self

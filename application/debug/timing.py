@@ -27,7 +27,7 @@ import struct
 import sys
 
 from collections import deque
-from itertools import chain, izip, takewhile
+from itertools import chain, takewhile
 from time import clock, time
 
 from application.python.decorator import decorator, preserve_signature
@@ -37,8 +37,8 @@ from application.python.types import MarkerType
 __all__ = 'Timer', 'TimeProbe', 'timer', 'time_probe', 'measure_time'
 
 
-class Automatic(object):
-    __metaclass__ = MarkerType
+class Automatic(object, metaclass=MarkerType):
+    pass
 
 
 class Autodetect(int):
@@ -47,6 +47,7 @@ class Autodetect(int):
 
     def __repr__(self):
         return self.__class__.__name__
+
 
 Autodetect = Autodetect()
 
@@ -121,11 +122,11 @@ class Timer(object):
                     normalized_time, time_unit = normalize_time(statement_time)
 
                     if self.description is not None:
-                        format_string = u'{} loops, best of {}: {:.{precision}g} {} per loop ({:.{rate_precision}f} operations/sec); {description}'
+                        format_string = '{} loops, best of {}: {:.{precision}g} {} per loop ({:.{rate_precision}f} operations/sec); {description}'
                     else:
-                        format_string = u'{} loops, best of {}: {:.{precision}g} {} per loop ({:.{rate_precision}f} operations/sec)'
+                        format_string = '{} loops, best of {}: {:.{precision}g} {} per loop ({:.{rate_precision}f} operations/sec)'
                     rate_precision = 2 if statement_rate < 10 else 1 if statement_rate < 100 else 0
-                    print format_string.format(loops, self.repeat, normalized_time, time_unit, statement_rate, description=self.description, precision=3, rate_precision=rate_precision)
+                    print(format_string.format(loops, self.repeat, normalized_time, time_unit, statement_rate, description=self.description, precision=3, rate_precision=rate_precision))
                 finally:
                     del parent
         finally:
@@ -159,7 +160,8 @@ class Timer(object):
 
         code_start = with_start + 3  # move past the SETUP_WITH opcode (1 byte opcode itself + 2 bytes delta)
         # skip the next bytecode which can be one of POP_TOP, STORE_FAST, STORE_NAME, UNPACK_SEQUENCE (POP_TOP is 1 byte, the others are 3)
-        if ord(o_code.co_code[code_start]) == dis.opmap['POP_TOP']:
+        # if ord(o_code.co_code[code_start]) == dis.opmap['POP_TOP']:
+        if o_code.co_code[code_start] == dis.opmap['POP_TOP']:
             code_start += 1
         else:
             code_start += 3
@@ -167,12 +169,12 @@ class Timer(object):
 
         code_bytes = bytearray(o_code.co_code[code_start:code_end])
 
-        try:
-            xrange
-        except NameError:
-            names = o_code.co_names + ('range',)
-        else:
-            names = o_code.co_names + ('xrange',)
+        # try:
+        #    xrange
+        # except NameError:
+        names = o_code.co_names + ('range',)
+        # else:
+        #    names = o_code.co_names + ('xrange',)
 
         code_constants = o_code.co_consts + (loop_count,)
 
@@ -200,15 +202,15 @@ class Timer(object):
         # xx +  3 == zz + 4  ->  xx = len(loop_header) + len(code_bytes) + 4 -  3 = len(loop_header) + len(code_bytes) +  1
         # yy + 16 == zz + 3  ->  yy = len(loop_header) + len(code_bytes) + 3 - 16 = len(loop_header) + len(code_bytes) - 13  (13 is the FOR_ITER bytecode offset)
 
-        loop_header = bytearray('\x78\x00\x00\x65\x00\x00\x64\x00\x00\x83\x01\x00\x44\x5d\x00\x00\x01')
-        loop_footer = bytearray('\x71\x0d\x00\x57\x64\x00\x00\x53')
+        loop_header = bytearray(b'\x78\x00\x00\x65\x00\x00\x64\x00\x00\x83\x01\x00\x44\x5d\x00\x00\x01')
+        loop_footer = bytearray(b'\x71\x0d\x00\x57\x64\x00\x00\x53')
 
-        struct.pack_into('<H', loop_header,  1, len(loop_header) + len(code_bytes) + 1)    # SETUP_LOOP delta (xx)
-        struct.pack_into('<H', loop_header,  4, len(names) - 1)                            # LOAD_NAME index for range function
-        struct.pack_into('<H', loop_header,  7, len(code_constants) - 1)                   # LOAD_CONST index for loop count
+        struct.pack_into('<H', loop_header, 1, len(loop_header) + len(code_bytes) + 1)    # SETUP_LOOP delta (xx)
+        struct.pack_into('<H', loop_header, 4, len(names) - 1)                            # LOAD_NAME index for range function
+        struct.pack_into('<H', loop_header, 7, len(code_constants) - 1)                   # LOAD_CONST index for loop count
         struct.pack_into('<H', loop_header, 14, len(loop_header) + len(code_bytes) - 13)   # FOR_ITER delta (yy)
 
-        struct.pack_into('<H', loop_footer,  5, code_constants.index(None))                # LOAD_CONST index for None
+        struct.pack_into('<H', loop_footer, 5, code_constants.index(None))                # LOAD_CONST index for None
 
         # adjust the jump addresses within the original code block to match the new bytecode offset they will have within the for loop
         index = 0
@@ -245,9 +247,9 @@ class Timer(object):
         byte_increments.appendleft(len(loop_header))
         line_increments.appendleft(1)
 
-        line_numbers_table = bytes(bytearray(chain.from_iterable(takewhile(WithinCodeRange(len(loop_header + code_bytes)), izip(byte_increments, line_increments)))))
+        line_numbers_table = bytes(bytearray(chain.from_iterable(takewhile(WithinCodeRange(len(loop_header + code_bytes)), zip(byte_increments, line_increments)))))
 
-        return code(o_code.co_argcount, o_code.co_nlocals, o_code.co_stacksize, o_code.co_flags, new_code_bytes, code_constants, names, o_code.co_varnames,
+        return code(o_code.co_argcount, o_code.co_kwonlyargcount, o_code.co_nlocals, o_code.co_stacksize, o_code.co_flags, new_code_bytes, code_constants, names, o_code.co_varnames,
                     o_code.co_filename, o_code.co_name, o_code.co_firstlineno + line_offset - 1, line_numbers_table, o_code.co_freevars, o_code.co_cellvars)
 
     @staticmethod
@@ -258,8 +260,8 @@ class Timer(object):
         # is the last entry in the constants tuple (which is how _build_loop_code builds the constants tuple)
         code_constants = o_code.co_consts[:-1] + (new_count,)
 
-        return code(o_code.co_argcount, o_code.co_nlocals, o_code.co_stacksize, o_code.co_flags, o_code.co_code, code_constants, o_code.co_names, o_code.co_varnames,
-                    o_code.co_filename, o_code.co_name, o_code.co_firstlineno, o_code.co_lnotab, o_code.co_freevars, o_code.co_cellvars)
+        return code(o_code.co_argcount, o_code.co_kwonlyargcount, o_code.co_nlocals, o_code.co_stacksize, o_code.co_flags, o_code.co_code, code_constants,
+                    o_code.co_names, o_code.co_varnames, o_code.co_filename, o_code.co_name, o_code.co_firstlineno, o_code.co_lnotab, o_code.co_freevars, o_code.co_cellvars)
 
     @staticmethod
     def _estimate_loop_count(run_time, loop_count):
@@ -271,6 +273,7 @@ class Timer(object):
         else:
             loops = 10**9
         return loops
+
 
 timer = Timer
 
@@ -312,11 +315,12 @@ class TimeProbe(object):
                 error_string = ''
             if self.description is not None:
                 # format_string = u'{:.{precision}g} {}{}; {description}'
-                format_string = u'{description}: {:.{precision}g} {}{}'
+                format_string = '{description}: {:.{precision}g} {}{}'
             else:
-                format_string = u'{:.{precision}g} {}{}'
-            print format_string.format(normalized_time, time_unit, error_string, description=self.description, precision=3)
+                format_string = '{:.{precision}g} {}{}'
+            print(format_string.format(normalized_time, time_unit, error_string, description=self.description, precision=3))
         del self._start_time
+
 
 time_probe = TimeProbe
 
@@ -357,7 +361,7 @@ class _MeasurementProbe(object):
         gc_enabled = gc.isenabled()
         gc.disable()
         try:
-            return _MeasurementSamples(self.get_sample() for _ in xrange(iterations))
+            return _MeasurementSamples(self.get_sample() for _ in range(iterations))
         finally:
             if gc_enabled:
                 gc.enable()

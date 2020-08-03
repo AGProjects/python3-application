@@ -1,9 +1,7 @@
 
 """Types and meta classes"""
 
-from __future__ import absolute_import
-
-from types import FunctionType, UnboundMethodType
+import inspect
 from application.python.decorator import preserve_signature
 
 
@@ -15,18 +13,19 @@ class Singleton(type):
 
     # noinspection PyInitNewSignature
     def __init__(cls, name, bases, dictionary):
-        if type(cls.__init__) is UnboundMethodType:
+        if inspect.ismethod(cls.__init__):
             initializer = cls.__init__
-        elif type(cls.__new__) is FunctionType:
+        elif inspect.isfunction(cls.__new__):
             initializer = cls.__new__
         else:
             # noinspection PyUnusedLocal
-            def initializer(self, *args, **kw): pass
+            def initializer(self, *args, **kw):
+                pass
 
         # noinspection PyShadowingNames
         @preserve_signature(initializer)
         def instance_creator(cls, *args, **kw):
-            key = (args, tuple(sorted(kw.iteritems())))
+            key = (args, tuple(sorted(kw.items())))
             try:
                 hash(key)
             except TypeError:
@@ -53,10 +52,8 @@ class NullTypeMeta(type):
         return cls.__instance__
 
 
-class NullType(object):
+class NullType(object, metaclass=NullTypeMeta):
     """Instances of this class always and reliably "do nothing"."""
-
-    __metaclass__ = NullTypeMeta
     __name__ = 'Null'
 
     def __init__(self, *args, **kw):
@@ -77,7 +74,7 @@ class NullType(object):
     def __len__(self):
         return 0
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
     def __eq__(self, other):
@@ -125,7 +122,7 @@ class NullType(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         raise StopIteration
 
 
@@ -140,5 +137,5 @@ class MarkerType(type):
     def __repr__(cls):
         return cls.__name__
 
-    def __nonzero__(cls):
+    def __bool__(cls):
         return cls.__boolean__

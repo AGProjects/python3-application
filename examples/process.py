@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 """Example of controlling the process behavior using the process module"""
 

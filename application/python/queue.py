@@ -1,21 +1,27 @@
 
 """Event processing queues, that process the events in a distinct thread"""
 
-import Queue
+import queue
 from threading import Thread, Event, Lock
 
 from application import log
 from application.python.types import MarkerType
-
 
 __all__ = 'EventQueue', 'CumulativeEventQueue'
 
 
 # Special events that control the queue operation (for internal use)
 
-class StopProcessing: __metaclass__ = MarkerType
-class ProcessEvents:  __metaclass__ = MarkerType
-class DiscardEvents:  __metaclass__ = MarkerType
+class StopProcessing(metaclass=MarkerType):
+    pass
+
+
+class ProcessEvents(metaclass=MarkerType):
+    pass
+
+
+class DiscardEvents(metaclass=MarkerType):
+    pass
 
 
 class EventQueue(Thread):
@@ -31,7 +37,7 @@ class EventQueue(Thread):
         self._pause_counter = 0
         self._pause_lock = Lock()
         self._accepting_events = True
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.handle = handler
         self.load(preload)
         self._active.set()
@@ -106,7 +112,7 @@ class EventQueue(Thread):
         try:
             while True:
                 self.queue.get_nowait()
-        except Queue.Empty:
+        except queue.Empty:
             pass
         self.unpause()
 
@@ -120,7 +126,7 @@ class EventQueue(Thread):
                 event = self.queue.get_nowait()
                 if event is not StopProcessing:
                     unhandled.append(event)
-        except Queue.Empty:
+        except queue.Empty:
             pass
         return unhandled
 

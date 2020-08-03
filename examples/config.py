@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 """Example of reading application settings from a configuration file"""
 
@@ -10,9 +10,9 @@ from application.system import host
 class Priority(int):
     """A numeric priority level. The keywords High, Normal and Low map to certain numeric values."""
     def __new__(cls, value):
-        if isinstance(value, (int, long)):
+        if isinstance(value, int):
             return int(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             priority_map = {'high': 10, 'normal': 50, 'low': 100}
             try:
                 return priority_map.get(value.lower()) or int(value)
@@ -49,11 +49,11 @@ class StorageConfig(ConfigSection):
 
 
 # Dump the default hardcoded values of the options defined above
-print "Settings before reading the configuration file (default hardcoded values)\n"
-print NetworkConfig
-print
-print StorageConfig
-print
+print("Settings before reading the configuration file (default hardcoded values)\n")
+print(NetworkConfig)
+print()
+print(StorageConfig)
+print()
 
 # Read the settings from the configuration file into the attributes of our
 # configuration classes. The read function takes a configuration file name
@@ -86,11 +86,11 @@ NetworkConfig.read('config.ini', 'Network')
 StorageConfig.read('config.ini', 'Storage')
 
 # Dump the values of the options after they were loaded from the config file
-print "\nSettings after reading the configuration file(s)\n"
-print NetworkConfig
-print
-print StorageConfig
-print
+print("\nSettings after reading the configuration file(s)\n")
+print(NetworkConfig)
+print()
+print(StorageConfig)
+print()
 
 # Configuration options can be accessed as class attributes
 ip = NetworkConfig.ip
@@ -102,8 +102,8 @@ ip = NetworkConfig.ip
 
 # Here is an example of such a class that will be automatically loaded
 
-print "\n------------------------------------\n"
-print "Using __cfgfile__ and __section__ to automatically load sections\n"
+print("\n------------------------------------\n")
+print("Using __cfgfile__ and __section__ to automatically load sections\n")
 
 
 class AutoNetworkConfig(ConfigSection):
@@ -126,12 +126,12 @@ class AutoStorageConfig(ConfigSection):
 
 
 # Dump the values of the options after they were loaded from the config file
-print "Settings in the automatically loaded sections\n"
-print
-print AutoNetworkConfig
-print
-print AutoStorageConfig
-print
+print("Settings in the automatically loaded sections\n")
+print()
+print(AutoNetworkConfig)
+print()
+print(AutoStorageConfig)
+print()
 
 # We can also get individual settings from a given section.
 #
@@ -141,10 +141,10 @@ print
 # above with the ConfigSection.read() method) apply here as well.
 #
 
-print "\n------------------------------------\n"
-print "Reading individual settings from sections without using ConfigSection"
+print("\n------------------------------------\n")
+print("Reading individual settings from sections without using ConfigSection")
 
 configuration = ConfigFile('config.ini')
 
 dburi = configuration.get_setting('Storage', 'dburi', type=str, default='undefined')
-print "\nGot dburi directly from Storage section as `%s'\n" % dburi
+print("\nGot dburi directly from Storage section as `%s'\n" % dburi)

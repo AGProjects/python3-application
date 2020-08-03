@@ -126,10 +126,8 @@ class RuntimeSettings(object):
             raise ProcessError('lacking permissions to access the runtime directory at %s' % directory)
 
 
-class Process(object):
+class Process(object, metaclass=Singleton):
     """Control how the current process runs and interacts with the operating system"""
-
-    __metaclass__ = Singleton
 
     def __init__(self):
         self._daemon = False
@@ -186,14 +184,14 @@ class Process(object):
                 # os._exit(0)
         except OSError as e:
             raise ProcessError('fork #1 failed: %d: %s' % (e.errno, e.strerror))
-        
+
         # Decouple from the controlling terminal.
         # Calling setsid() we become a process group and session group leader.
         # Since a controlling terminal is associated with a session, and this
         # new session has not yet acquired a controlling terminal our process
         # now has no controlling terminal, which is a Good Thing for daemons.
         os.setsid()
-        
+
         # Second fork
         # This will allow the parent (the session group leader obtained above)
         # to exit. This means that the child, as a non-session group leader,
@@ -205,7 +203,7 @@ class Process(object):
                 # os._exit(0)
         except OSError as e:
             raise ProcessError('fork #2 failed: %d: %s' % (e.errno, e.strerror))
-        
+
         # Setup our environment.
         # Change working directory to / so we do not keep any directory in use
         # preventing them from being unmounted. Also set file creation mask.
@@ -290,11 +288,9 @@ class Process(object):
             raise RuntimeError('Network is not available after waiting for {} seconds'.format(wait_time))
 
 
-class Signals(object):
+class Signals(object, metaclass=Singleton):
     """Interface to the system signals"""
 
-    __metaclass__ = Singleton
-    
     def __init__(self):
         self._handlers = {}
         self._original_signal = signal.signal

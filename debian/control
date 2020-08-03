@@ -1,14 +1,16 @@
-Source: python-application
+Source: python3-application
 Section: python
 Priority: optional
-Maintainer: Dan Pascu <dan@ag-projects.com>
-Build-Depends: debhelper (>= 11), dh-python, python
+Maintainer: Adrian Georgescu <ag@ag-projects.com>
+Build-Depends: debhelper (>= 11), dh-python, python3
 Standards-Version: 4.5.0
-Homepage: https://pypi.python.org/pypi/python-application
+Homepage: http://ag-projects.com
+X-Python3-Version: >= 3.7
 
-Package: python-application
+
+Package: python3-application
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python-zope.interface
+Depends: ${python3:Depends}, ${misc:Depends}, python3-zope.interface
 Description: Basic building blocks for Python applications
  This module provides some basic components that can be used to simplify
  building Python applications.
