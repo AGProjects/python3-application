@@ -319,8 +319,13 @@ class StandardIOLogger(io.IOBase):
 
     def write(self, string):
         self._checkClosed()
-        if isinstance(string, str):
-            string = string.encode(self._encoding)
+        """
+        This code is causing errors since you can't concat a <str> with a <bytes>.
+        Since all strings are unicode in python3, this is probably not needed anymore
+        -- Tijmen
+        """
+        # if isinstance(string, str):
+        #     string = string.encode(self._encoding)
         lines = (self._buffer + string).split('\n')
         self._buffer = lines[-1]
         for line in lines[:-1]:
@@ -329,8 +334,13 @@ class StandardIOLogger(io.IOBase):
     def writelines(self, lines):
         self._checkClosed()
         for line in lines:
-            if isinstance(line, str):
-                line = line.encode(self._encoding)
+            """
+            This code is causing errors since you can't concat a <str> with a <bytes>.
+            Since all strings are unicode in python3, this is probably not needed anymore
+            -- Tijmen
+            """
+            # if isinstance(line, str):
+            #    line = line.encode(self._encoding)
             self._logger(line)
 
 
