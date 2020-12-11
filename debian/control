@@ -2,6 +2,7 @@ Source: python3-application
 Section: python
 Priority: optional
 Maintainer: Adrian Georgescu <ag@ag-projects.com>
+Uploaders: Tijmen de Mes <tijmen@ag-projects.com>
 Build-Depends: debhelper (>= 11), dh-python, python3
 Standards-Version: 4.5.0
 Homepage: http://ag-projects.com
