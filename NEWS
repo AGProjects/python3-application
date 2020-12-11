@@ -1,3 +1,9 @@
+New in version 3.0.1
+--------------------
+
+Fixed crash when using log.capture_output()
+
+
 New in version 3.0.0
 --------------------
 
