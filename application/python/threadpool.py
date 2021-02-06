@@ -1,7 +1,7 @@
 
 """A generic, resizable thread pool"""
 
-import queue as queue
+import queue
 from itertools import count
 from threading import Lock, Thread, current_thread
 
@@ -30,7 +30,7 @@ class ThreadPool(object):
         assert 0 <= min_threads <= max_threads > 0, 'invalid bounds'
         self.name = name
         self._lock = Lock()
-        self._queue = queue()
+        self._queue = queue.Queue()
         self._thread_id = None
         self._threads = []
         self._started = False
