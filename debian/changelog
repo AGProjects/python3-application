@@ -1,6 +1,6 @@
 python3-application (3.0.2) unstable; urgency=medium
 
-  * Fixced queue
+  * Fixed queue
 
  -- Adrian Georgescu <ag@ag-projects.com>  Sat, 06 Feb 2021 15:05:09 +0100
 
