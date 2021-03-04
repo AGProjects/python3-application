@@ -8,4 +8,6 @@ cd dist
 
 tar zxvf *.tar.gz
 cd python3-application-?.?.?
-#debuild
+
+debuild --no-sign
+
