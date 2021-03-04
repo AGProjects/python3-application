@@ -1,3 +1,9 @@
+python3-application (3.0.3) unstable; urgency=medium
+
+  * Fixed writing process pid
+
+ -- Adrian Georgescu <ag@ag-projects.com>  Thu, 04 Mar 2021 15:51:56 +0100
+
 python3-application (3.0.2) unstable; urgency=medium
 
   * Fixed queue
