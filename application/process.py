@@ -216,7 +216,7 @@ class Process(object, metaclass=Singleton):
         if os.path.dirname(self._pidfile) == self.runtime.directory:
             self.runtime.create_directory()
         try:
-            with open(self._pidfile, 'wb') as pf:
+            with open(self._pidfile, 'w') as pf:
                 pf.write('%s\n' % os.getpid())
         except IOError as e:
             raise ProcessError('unable to write pidfile %s: %s' % (self._pidfile, e))
