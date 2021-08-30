@@ -28,7 +28,11 @@ import sys
 
 from collections import deque
 from itertools import chain, takewhile
-from time import clock, time
+
+if sys.platform == 'win32':
+    from time import clock
+else:
+    from time import time
 
 from application.python.decorator import decorator, preserve_signature
 from application.python.types import MarkerType
