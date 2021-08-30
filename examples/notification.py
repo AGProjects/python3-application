@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from time import time
-from zope.interface import implements
+from zope.interface import implementer
 from application.notification import IObserver, NotificationData, NotificationCenter, ObserverWeakrefProxy
 
 
@@ -30,9 +30,9 @@ class AnonymousSender(Sender):
         center.post_notification(name='empty', data=None)
 
 
+@implementer(IObserver)
 class CatchAllObserver(object):
     """An observer that registers itself to receive all notifications."""
-    implements(IObserver)
 
     def register(self):
         print("Registering CatchAllObserver to receive all notifications")
@@ -46,9 +46,9 @@ class CatchAllObserver(object):
         print("In CatchAllObserver got %r" % (notification,))
 
 
+@implementer(IObserver)
 class SimpleObserver(object):
     """An observer that registers itself for notifications with name 'simple'."""
-    implements(IObserver)
 
     def register(self):
         print("Registering SimpleObserver to receive notifications with name 'simple' from any sender")
@@ -62,9 +62,9 @@ class SimpleObserver(object):
         print("In SimpleObserver got %r" % (notification,))
 
 
+@implementer(IObserver)
 class ObjectObserver(object):
     """An observer that registers itself for notifications coming from a specific object."""
-    implements(IObserver)
 
     def __init__(self, sender):
         self.sender = sender
@@ -81,9 +81,9 @@ class ObjectObserver(object):
         print("In ObjectObserver got %r" % (notification,))
 
 
+@implementer(IObserver)
 class VolatileAllObserver(object):
     """An observer that registers itself to receive all notifications and it is weakly referenced"""
-    implements(IObserver)
 
     def __init__(self):
         print("Registering VolatileAllObserver to receive all notifications")
