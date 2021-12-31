@@ -1,7 +1,8 @@
 
 import weakref
 
-from collections import MutableMapping, deque
+from collections.abc import MutableMapping
+from collections import deque
 from copy import deepcopy
 from threading import local
 
