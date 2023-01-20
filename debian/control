@@ -6,7 +6,7 @@ Uploaders: Tijmen de Mes <tijmen@ag-projects.com>
 Build-Depends: debhelper (>= 11), dh-python, python3
 Standards-Version: 4.5.0
 Homepage: http://ag-projects.com
-X-Python3-Version: >= 3.6.5
+X-Python3-Version: >= 3.6
 
 
 Package: python3-application
