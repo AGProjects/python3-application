@@ -21,7 +21,7 @@ def preserve_signature(func):
         sig = signature(func)
         parameters = sig.replace(parameters=[parameter.replace(default=parameter.empty) for parameter in sig.parameters.values()])
 
-        exec("def {0}{1}: return wrapper{2}".format(func.__name__, sig, parameters), {'wrapper': wrapper}, exec_scope)  # can't use tuple form here (see https://bugs.python.org/issue21591)
+        exec("def {0}{1}: return wrapper{1}".format(func.__name__, parameters), {'wrapper': wrapper}, exec_scope)  # can't use tuple form here (see https://bugs.python.org/issue21591)
         new_wrapper = exec_scope.pop(func.__name__)
         new_wrapper.__name__ = func.__name__
         new_wrapper.__doc__ = func.__doc__
