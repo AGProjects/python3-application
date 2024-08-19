@@ -268,6 +268,16 @@ class Process(object, metaclass=Singleton):
         self._setup_signal_handlers()
         atexit.register(self.__on_exit)
 
+    def make_pidfile(self, pidfile=None):
+        """Make a pidfile for the running process"""
+        if self._daemon:
+            raise ProcessError('already in daemon mode')
+        if pidfile:
+            self._pidfile = self.runtime.file(pidfile)
+        self._make_pidfile()
+        self._setup_signal_handlers()
+        atexit.register(self.__on_exit)
+
     @staticmethod
     def wait_for_network(wait_time=10, wait_message=None, test_ip='1.2.3.4'):
         """
