@@ -270,8 +270,13 @@ class SyslogHandler(logging.Handler):
         try:
             priority = self.priority_map.get(record.levelno, syslog.LOG_INFO)
             message = self.format(record)
-            if isinstance(message, str):
-                message = message.encode('UTF-8')
+            """
+            This code is causing errors since you can't concat a <str> with a <bytes>.
+            Since all strings are unicode in python3, this is probably not needed anymore
+            -- Tijmen
+            """
+            #if isinstance(message, str):
+            #    message = message.encode('UTF-8')
             for line in message.rstrip().replace('\0', '#000').split('\n'):  # syslog.syslog() raises TypeError if null bytes are present in the message
                 syslog.syslog(priority, line)
         except Exception:
