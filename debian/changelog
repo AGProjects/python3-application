@@ -1,3 +1,9 @@
+python3-application (3.0.9) unstable; urgency=medium
+
+  * Fixed traceback in syslog logging
+
+ -- Tijmen de Mes <tijmen@ag-projects.com>  Fri, 30 May 2025 10:15:34 +0200
+
 python3-application (3.0.8) unstable; urgency=medium
 
   *  Added function to make a pidfile for a process
