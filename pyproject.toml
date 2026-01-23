@@ -1,0 +1,39 @@
+[build-system]
+requires = [
+  "setuptools >= 66.1.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python3-application"
+description = "Basic building blocks for python3 applications"
+license = "LGPL-2.1-or-later"
+readme = { file = "README", content-type = "text/plain" }
+urls = { source = "https://github.com/AGProjects/python3-application" }
+
+dependencies = [
+	"zope.interface"
+]
+
+authors = [
+	{ name = "Dan Pascu", email = "support@ag-projects.com" }
+]
+
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	"Intended Audience :: Developers",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python",
+	"Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+dynamic = ["version"]
+
+[tool.setuptools]
+platforms = ["Platform Independent"]
+
+[tool.setuptools.dynamic]
+version = { attr = "application.__version__" }
+
+# Cannot use attr for description: https://github.com/pypa/setuptools/issues/5053
+#description = { attr = "application.__summary__" }

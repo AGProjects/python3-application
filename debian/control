@@ -3,7 +3,11 @@ Section: python
 Priority: optional
 Maintainer: Adrian Georgescu <ag@ag-projects.com>
 Uploaders: Tijmen de Mes <tijmen@ag-projects.com>
-Build-Depends: debhelper (>= 11), dh-python, python3
+Build-Depends: debhelper (>= 11),
+               dh-python,
+               python3,
+               python3-setuptools (>= 66.1.0),
+               pybuild-plugin-pyproject
 Standards-Version: 4.5.0
 Homepage: http://ag-projects.com
 X-Python3-Version: >= 3.6

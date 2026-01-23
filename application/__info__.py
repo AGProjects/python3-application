@@ -10,5 +10,5 @@ __version__ = '3.0.9'
 __author__ = 'Dan Pascu'
 __email__ = 'support@ag-projects.com'
 
-__license__ = 'LGPL'
+__license__ = 'LGPL-2.1-or-later'
 __copyright__ = 'Copyright 2025 {}'.format(__author__)
