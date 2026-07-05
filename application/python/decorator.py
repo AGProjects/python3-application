@@ -42,21 +42,26 @@ def execute_once(func):
         pass
 
     class ExecuteOnceMethodWrapper(object):
-        __slots__ = '__weakref__', '__method__', 'im_func_wrapper', 'called', 'lock'
+        __slots__ = '__weakref__', '__method__', '__owner__', 'im_func_wrapper'
 
-        def __init__(self, method, func_wrapper):
+        def __init__(self, method, owner, func_wrapper):
             self.__method__ = method
+            self.__owner__ = owner
             self.im_func_wrapper = func_wrapper
 
         def __call__(self, *args, **kw):
             with self.im_func_wrapper.lock:
                 method = self.__method__
-                check_arguments.__get__(method.__self__, method.__self__.__class__)(*args, **kw)
-                instance = method.__self__ if method.__self__ is not None else args[0]
+                instance = getattr(method, '__self__', None)
+                if instance is not None:
+                    check_arguments.__get__(instance, instance.__class__)(*args, **kw)
+                else:  # method was accessed via the class (plain function in python3), the instance is expected as the 1st argument
+                    check_arguments(*args, **kw)
+                    instance = args[0]
                 if self.im_func_wrapper.__callmap__.get(instance, False):
                     return
                 self.im_func_wrapper.__callmap__[instance] = True
-                self.im_func_wrapper.__callmap__[method.__self__.__class__] = True
+                self.im_func_wrapper.__callmap__[instance.__class__] = True
                 return method.__call__(*args, **kw)
 
         def __dir__(self):
@@ -64,7 +69,7 @@ def execute_once(func):
 
         def __get__(self, obj, cls):
             method = self.__method__.__get__(obj, cls)
-            return self.__class__(method, self.im_func_wrapper)
+            return self.__class__(method, cls, self.im_func_wrapper)
 
         def __getattr__(self, name):
             return getattr(self.__method__, name)
@@ -86,14 +91,15 @@ def execute_once(func):
 
         @property
         def called(self):
-            return self.im_func_wrapper.__callmap__.get(self.__method__.__self__ if self.__method__.__self__ is not None else self.__method__.__self__.__class__, False)
+            instance = getattr(self.__method__, '__self__', None)
+            return self.im_func_wrapper.__callmap__.get(instance if instance is not None else self.__owner__, False)
 
         @property
         def lock(self):
             return self.im_func_wrapper.lock
 
     class ExecuteOnceFunctionWrapper(object):
-        __slots__ = '__weakref__', '__func__', '__callmap__', 'called', 'lock'
+        __slots__ = '__weakref__', '__func__', '__callmap__', 'lock'
 
         # noinspection PyShadowingNames
         def __init__(self, func):
@@ -115,7 +121,7 @@ def execute_once(func):
 
         def __get__(self, obj, cls):
             method = self.__func__.__get__(obj, cls)
-            return ExecuteOnceMethodWrapper(method, self)
+            return ExecuteOnceMethodWrapper(method, cls, self)
 
         def __getattr__(self, name):
             return getattr(self.__func__, name)
