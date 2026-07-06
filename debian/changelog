@@ -1,3 +1,9 @@
+python3-application (3.0.11) unstable; urgency=medium
+
+  * Fixed ExecuteOnceMethodWrapper method
+
+ -- Tijmen de Mes <support@ag-projects.com>  Mon, 06 Jul 2026 11:22:22 +0200
+
 python3-application (3.0.10) unstable; urgency=medium
 
   * Switch packaging to setuptools and PEP621
