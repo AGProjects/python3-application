@@ -1,13 +1,16 @@
 #!/bin/bash
-if [ -f dist ]; then
-    rm -r dist
-fi
+set -e
 
-python3 setup.py sdist
+rm -rf dist build
+
+if [ -f setup.py ]; then
+    python3 setup.py sdist
+else
+    python3 -m build --sdist
+fi
 cd dist
 
-tar zxvf *.tar.gz
-cd python3-application-?.?.?
+tar zxf *.tar.gz
+cd */
 
 debuild --no-sign
-
