@@ -4,7 +4,7 @@
 import weakref
 from collections import deque
 from datetime import datetime
-from threading import Lock
+from threading import Lock, RLock
 from time import time
 from zope.interface import Interface, implementer
 
@@ -117,7 +117,10 @@ class NotificationCenter(object, metaclass=Singleton):
         """
         self.name = name
         self.observers = {}
-        self.lock = Lock()
+        # Must be reentrant: ObserverWeakrefProxy.cleanup is a weakref callback that can be
+        # invoked by the garbage collector while this lock is held by the same thread and
+        # it calls purge_observer which acquires the lock again.
+        self.lock = RLock()
 
     def add_observer(self, observer, name=Any, sender=Any):
         """
@@ -151,7 +154,7 @@ class NotificationCenter(object, metaclass=Singleton):
             except KeyError:
                 raise KeyError('observer %r not registered for %r events from %r' % (observer, name, sender))
             if not observer_set:
-                del self.observers[(name, sender)]
+                self.observers.pop((name, sender), None)
 
     def discard_observer(self, observer, name=Any, sender=Any):
         """
@@ -168,16 +171,17 @@ class NotificationCenter(object, metaclass=Singleton):
             if observer_set is not None:
                 observer_set.discard(observer)
                 if not observer_set:
-                    del self.observers[(name, sender)]
+                    self.observers.pop((name, sender), None)
 
     def purge_observer(self, observer):
         """Remove all the observer's subscriptions."""
         with self.lock:
-            subscriptions = [(key, observer_set) for key, observer_set in self.observers.items() if observer in observer_set]
-            for key, observer_set in subscriptions:
-                observer_set.remove(observer)
-                if not observer_set:
-                    del self.observers[key]
+            # iterate over a copy and tolerate missing entries, as a reentrant purge triggered by GC can modify the mapping
+            for key, observer_set in self.observers.copy().items():
+                if observer in observer_set:
+                    observer_set.discard(observer)
+                    if not observer_set:
+                        self.observers.pop(key, None)
 
     def post_notification(self, name, sender=UnknownSender, data=NotificationData()):
         """
