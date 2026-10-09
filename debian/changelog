@@ -1,3 +1,9 @@
+python3-application (3.0.12) unstable; urgency=medium
+
+  * Fix NotificationCenter self-deadlock 
+
+ -- Tijmen de Mes <support@ag-projects.com>  Sat, 19 Sep 2026 14:25:08 +0200
+
 python3-application (3.0.11) unstable; urgency=medium
 
   * Fixed ExecuteOnceMethodWrapper method
